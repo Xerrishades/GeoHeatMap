@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Geolocation</title>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <style>
+      /* Always set the map height explicitly to define the size of the div
+       * element that contains the map. */
+      #map {
+        height: 100%;
+      }
+      /* Optional: Makes the sample page fill the window. */
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <script>
+      var map, infoWindow, heatmap;
+	  let latArray = [];
+	  let lngArray = [];
+      
+	  function initMap() {
+        map = new google.maps.Map(document.getElementById('map'), {
+          center: {lat: 0, lng: 90},
+          zoom: 6
+        });
+		
+        infoWindow = new google.maps.InfoWindow;
+
+        // Try HTML5 geolocation.
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(function(position) {
+            var pos = {
+              lat: position.coords.latitude,
+              lng: position.coords.longitude
+            };
+			var dataPoints = [];
+			
+			dataPoints.push(pos);
+			  
+			window.addEventListener("keydown", myFunction);
+			
+			heatmap = new google.maps.visualization.HeatmapLayer({
+						data: getPoints(dataPoints),
+						map: map
+					  });
+			
+			function myFunction(event) {
+			
+				//navigator.geolocation.getCurrentPosition((newPosition) => {
+				//	dataPoints.push(newPosition);
+				//});
+				
+				let newPosition = {...dataPoints[dataPoints.length - 1]};
+				
+			  
+				  var key = event.keyCode;
+				  
+				  var speed = .0001
+				  
+				  if (key == 87)
+				  {
+					newPosition.lat += speed;
+				  }
+				  
+				  else if  (key == 68)
+				  {
+					newPosition.lng += speed;
+				  }
+				  
+				  else if (key == 83)
+				  {
+					newPosition.lat -= speed;
+				  }
+				  
+				  else if (key == 65)
+				  {
+					newPosition.lng -= speed;
+				  }
+			  
+					dataPoints.push(newPosition);
+			  
+				  //else if (key == 13){
+					  heatmap.setData(getPoints(dataPoints)	);
+					
+					//speed = 0;
+				  //}
+			
+					console.log(pos.lat + " " + pos.lng)
+					infoWindow.setPosition(newPosition);
+					infoWindow.setContent(newPosition.lat + " " + newPosition.lng);
+					infoWindow.open(map);
+					map.setCenter(newPosition	);
+					map.setZoom(17);
+					console.log("lat: " + latArray);
+					console.log("array? " + Array.isArray(latArray));
+					console.log("lng: " + lngArray);
+					console.log("array: " + dataPoints);
+/*				if (dataPoints.length == 300) {
+				  return;
+				} */
+				
+				};
+			  }, function() {
+				handleLocationError(true, infoWindow, map.getCenter());
+		  });
+		  
+		  
+        } else {
+          // Browser doesn't support Geolocation
+          handleLocationError(false, infoWindow, map.getCenter());
+        }
+		//heatmap = new google.maps.visualization.HeatmapLayer({
+          //data: getPoints(latArray, lngArray),
+         // map: map
+	    //});
+		
+      function getPoints(dataPoints) { 
+		 return dataPoints.map(({lat, lng}) => {
+			return new google.maps.LatLng(lat, lng);
+		 });
+	  }
+	  }
+      function handleLocationError(browserHasGeolocation, infoWindow, pos) {
+        infoWindow.setPosition(pos);
+        infoWindow.setContent(browserHasGeolocation ?
+                              'Error: The Geolocation service failed.' :
+                              'Error: Your browser doesn\'t support geolocation.');
+        infoWindow.open(map);
+      }
+
+    </script>
+    <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAAzixJflLRi8g-PZgcTMqZP822QWibrH0&libraries=visualization
+&callback=initMap">
+    </script>
+  </body>
+</html>
